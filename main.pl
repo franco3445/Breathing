@@ -20,15 +20,15 @@ $mainWindow->Label(-text => 'Focus on your breathing...')->pack;
 $mainWindow->ProgressBar(
     -blocks   => 100,
     -colors   => $colorOptions,
-    -from     => 0,
+    -from     => 1,
     -gap      => 0,
-    -to       => 100,
     -length   => $screenWidth,
+    -to       => 100,
     -variable => \$updatePercentage,
 )->pack;
 
 $mainWindow->Button(
-    -text    => 'Quit',
+    -text    => 'Exit App',
     -command => sub { exit },
 )->pack;
 
@@ -38,15 +38,18 @@ MainLoop;
 
 sub breath {
     my $step = shift;
-    my $direction = 'up';
-    while ($direction eq 'up'){
+    my $isIncrementing = 1;
+    my $pause = 1;
+    my $stepSpeed = 0.01;
+
+    while ($isIncrementing == 1){
         for (1..100) {
             $updatePercentage += $step;
             $mainWindow->update;
-            select(undef, undef, undef, 0.01);
+            select(undef, undef, undef, $stepSpeed);
         }
-        select(undef, undef, undef, 0.3);
-        $direction = 'down';
+        sleep($pause);
+        $isIncrementing = 0;
     }
     &breath($step * -1);
 }
