@@ -43,18 +43,15 @@ MainLoop;
 
 sub breath {
     my $step = shift;
-    my $isIncrementing = 1;
     my $pause = 1;
     my $stepSpeed = 0.01;
 
-    while ($isIncrementing == 1){
-        for (1..100) {
-            $updatePercentage += $step;
-            $mainWindow->update;
-            select(undef, undef, undef, $stepSpeed);
-        }
-        sleep($pause);
-        $isIncrementing = 0;
+    for (1..100) {
+        $updatePercentage += $step;
+        $mainWindow->update;
+        select(undef, undef, undef, $stepSpeed);
     }
+
+    sleep($pause);
     &breath($step * -1);
 }
