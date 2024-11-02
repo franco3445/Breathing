@@ -9,11 +9,16 @@ my $colorOptions = [0, 'red', 20, 'orange' , 40, 'yellow', 60, 'green', 80, 'blu
 
 my $mainWindow = MainWindow->new;
 
-my $screenHeight = $mainWindow->screenheight - 150;
-my $screenWidth = $mainWindow->screenwidth;
-my $windowGeometry = "x50+0+$screenHeight";
+my $xCoordinate = 0;
+my $yCoordinate = $mainWindow->screenheight * .85;
+my $windowWidth = $mainWindow->screenwidth;
+my $windowHeight = 50;
+my $windowSize = $windowWidth . 'x' . $windowHeight;
+my $windowCoordinates = "$xCoordinate+$yCoordinate";
 
-$mainWindow->geometry($screenWidth . $windowGeometry);
+my $windowGeometry = "$windowSize+$windowCoordinates";
+
+$mainWindow->geometry($windowGeometry);
 
 $mainWindow->Label(-text => 'Focus on your breathing...')->pack;
 
@@ -22,7 +27,7 @@ $mainWindow->ProgressBar(
     -colors   => $colorOptions,
     -from     => 1,
     -gap      => 0,
-    -length   => $screenWidth,
+    -length   => $windowWidth,
     -to       => 100,
     -variable => \$updatePercentage,
 )->pack;
