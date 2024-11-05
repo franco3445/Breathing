@@ -5,12 +5,31 @@ use Tk;
 use Tk::ProgressBar;
 use Tk::Table;
 
-my $DEFAULT_BANNER = 'Focus on your breathing...';
-my $PROGRESS_BAR_COLORS = [0, 'red', 20, 'orange' , 40, 'yellow', 60, 'green', 80, 'blue'];
+my $LABEL = {
+    default => 'Click Start to begin',
+    exhale  => 'Exhale',
+    inhale  => 'Inhale',
+};
 
-my $breathing = 1;
-my $banner = $DEFAULT_BANNER;
-my $updatePercentage = 0;
+my $BUTTON = {
+    exit  => 'Exit App',
+    pause => 'Pause',
+    start => 'Start',
+};
+
+my $COLOR = {
+    blue   => 'blue',
+    green  => 'green',
+    orange => 'orange',
+    red    => 'red',
+    yellow => 'yellow',
+};
+
+my $PROGRESS_BAR_COLORS = [0, $COLOR->{red}, 20, $COLOR->{orange}, 40, $COLOR->{yellow}, 60, $COLOR->{green}, 80, $COLOR->{blue}];
+
+my $isBreathing = 0;
+my $labelText = $LABEL->{default};
+my $progressPercentage = 0;
 my $progressBarDirection = 1;
 
 my $mainWindow = MainWindow->new;
@@ -26,7 +45,7 @@ my $windowGeometry = "$windowSize+$windowCoordinates";
 
 $mainWindow->geometry($windowGeometry);
 
-$mainWindow->Label(-textvariable => \$banner)->pack;
+$mainWindow->Label(-textvariable => \$labelText)->pack;
 
 $mainWindow->ProgressBar(
     -blocks   => 100,
@@ -35,27 +54,33 @@ $mainWindow->ProgressBar(
     -gap      => 0,
     -length   => $windowWidth,
     -to       => 100,
-    -variable => \$updatePercentage,
+    -variable => \$progressPercentage,
 )->pack;
 
 my $table = $mainWindow->Table(
+    -columns    => 3,
     -rows       => 2,
-    -columns    => 2,
     -scrollbars => '',
 )->pack;
 
+my $startButton = $table->Button(
+    -command => sub { $isBreathing = 1 },
+    -text    => $BUTTON->{start},
+)->pack;
+
 my $pauseButton = $table->Button(
-    -text    => 'Pause',
-    -command => sub { $breathing = !$breathing },
+    -command => sub { $isBreathing = 0 },
+    -text    => $BUTTON->{pause},
 )->pack;
 
 my $exitButton = $table->Button(
-    -text    => 'Exit App',
     -command => sub { $mainWindow->destroy(); },
+    -text    => $BUTTON->{exit},
 )->pack;
 
-$table->put(1,1, $pauseButton);
-$table->put(1,2, $exitButton);
+$table->put(1,1, $startButton);
+$table->put(1,2, $pauseButton);
+$table->put(1,3, $exitButton);
 
 $mainWindow->after(1000, (\&breath(1)));
 
@@ -64,8 +89,7 @@ MainLoop;
 sub breath {
     my $step = shift;
 
-    while ($breathing){
-        $banner = 'Focus on your breathing...';
+    while ($isBreathing){
         $progressBarDirection
             ? inhale($step)
             : exhale($step);
@@ -75,14 +99,14 @@ sub breath {
 
 sub exhale {
     my $step = shift;
-    $banner = 'Exhale';
-    while ($updatePercentage >= 0 && $breathing) {
-        $updatePercentage -= $step;
+    $labelText = $LABEL->{exhale};
+    while ($progressPercentage >= 0 && $isBreathing) {
+        $progressPercentage -= $step;
         $mainWindow->update;
         select(undef, undef, undef, 0.01);
     }
 
-    if ($breathing) {
+    if ($isBreathing) {
         $progressBarDirection =! $progressBarDirection;
         sleep(1);
     }
@@ -90,22 +114,22 @@ sub exhale {
 
 sub inhale {
     my $step = shift;
-    $banner = 'Inhale';
-    while ($updatePercentage <= 100 && $breathing) {
-        $updatePercentage += $step;
+    $labelText = $LABEL->{inhale};
+    while ($progressPercentage <= 100 && $isBreathing) {
+        $progressPercentage += $step;
         $mainWindow->update;
         select(undef, undef, undef, 0.01);
     }
 
-    if ($breathing) {
+    if ($isBreathing) {
         $progressBarDirection =! $progressBarDirection;
         sleep(1);
     }
 }
 
 sub pause {
-    $banner = '**PAUSED**';
-    $breathing = 0;
+    $labelText = $LABEL->{default};
+    $isBreathing = 0;
     $mainWindow->update;
     sleep(.5);
     &breath(1);
