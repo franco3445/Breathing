@@ -5,10 +5,10 @@ use Tk;
 use Tk::ProgressBar;
 use Tk::Table;
 
-my $DEFAULT_BANNER = 'Focus on your breathing...';
+my $DEFAULT_BANNER = 'Click Start to begin';
 my $PROGRESS_BAR_COLORS = [0, 'red', 20, 'orange' , 40, 'yellow', 60, 'green', 80, 'blue'];
 
-my $breathing = 1;
+my $breathing = 0;
 my $banner = $DEFAULT_BANNER;
 my $updatePercentage = 0;
 my $progressBarDirection = 1;
@@ -40,13 +40,18 @@ $mainWindow->ProgressBar(
 
 my $table = $mainWindow->Table(
     -rows       => 2,
-    -columns    => 2,
+    -columns    => 3,
     -scrollbars => '',
+)->pack;
+
+my $startButton = $table->Button(
+    -text    => 'Start',
+    -command => sub { $breathing = 1 },
 )->pack;
 
 my $pauseButton = $table->Button(
     -text    => 'Pause',
-    -command => sub { $breathing = !$breathing },
+    -command => sub { $breathing = 0 },
 )->pack;
 
 my $exitButton = $table->Button(
@@ -54,8 +59,9 @@ my $exitButton = $table->Button(
     -command => sub { $mainWindow->destroy(); },
 )->pack;
 
-$table->put(1,1, $pauseButton);
-$table->put(1,2, $exitButton);
+$table->put(1,1, $startButton);
+$table->put(1,2, $pauseButton);
+$table->put(1,3, $exitButton);
 
 $mainWindow->after(1000, (\&breath(1)));
 
@@ -104,7 +110,7 @@ sub inhale {
 }
 
 sub pause {
-    $banner = '**PAUSED**';
+    $banner = $DEFAULT_BANNER;
     $breathing = 0;
     $mainWindow->update;
     sleep(.5);
