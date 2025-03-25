@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Tk;
+use Tk::Optionmenu;
 use Tk::ProgressBar;
 use Tk::Table;
 
@@ -25,7 +26,7 @@ my $COLOR = {
     yellow => 'yellow',
 };
 
-my $PROGRESS_BAR_COLORS = [0, $COLOR->{red}, 20, $COLOR->{orange}, 40, $COLOR->{yellow}, 60, $COLOR->{green}, 80, $COLOR->{blue}];
+my $PROGRESS_BAR_COLOR = [0, $COLOR->{red}];
 
 my $isBreathing = 0;
 my $labelText = $LABEL->{default};
@@ -47,9 +48,9 @@ $mainWindow->geometry($windowGeometry);
 
 $mainWindow->Label(-textvariable => \$labelText)->pack;
 
-$mainWindow->ProgressBar(
+my $progressBar = $mainWindow->ProgressBar(
     -blocks   => 100,
-    -colors   => $PROGRESS_BAR_COLORS,
+    -colors   => $PROGRESS_BAR_COLOR,
     -from     => 1,
     -gap      => 0,
     -length   => $windowWidth,
@@ -62,6 +63,18 @@ my $table = $mainWindow->Table(
     -rows       => 2,
     -scrollbars => '',
 )->pack;
+
+
+$mainWindow->Optionmenu(
+    -options => [ [Red => $COLOR->{red}], [Green => $COLOR->{green}], [Blue => $COLOR->{blue}], [Yellow => $COLOR->{yellow}] , [Orange => $COLOR->{orange}] ],
+    -command => sub {
+        $PROGRESS_BAR_COLOR = [0, shift()];
+        $progressBar->configure(-colors => $PROGRESS_BAR_COLOR);
+        $mainWindow->update;
+    },
+    -variable => \$PROGRESS_BAR_COLOR,
+)->pack;
+
 
 my $startButton = $table->Button(
     -command => sub { $isBreathing = 1 },
